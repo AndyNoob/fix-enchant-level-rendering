@@ -20,14 +20,12 @@ import java.util.regex.Pattern;
 @SuppressWarnings("JavaReflectionMemberAccess")
 public class ComponentEditing {
 
-    private static final Class<?> CRAFT_PLAYER;
     private static final Method CRAFT_TO_NMS_COPY;
     private static final Field NMS_TAG_DATA;
 
     static {
         String craftBukkit = Bukkit.getServer().getClass().getPackageName();
         try {
-            CRAFT_PLAYER = Class.forName(craftBukkit + ".entity.CraftPlayer");
             Class<?> craftItemStack = Class.forName(
                     craftBukkit + ".inventory.CraftItemStack"
             );
