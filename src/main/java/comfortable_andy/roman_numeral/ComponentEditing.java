@@ -2,22 +2,17 @@ package comfortable_andy.roman_numeral;
 
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.google.common.html.HtmlEscapers;
 import com.google.gson.Gson;
-import net.minecraft.nbt.CompoundTag;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
-import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,8 +21,6 @@ import java.util.regex.Pattern;
 public class ComponentEditing {
 
     private static final Class<?> CRAFT_PLAYER;
-    private static final Method GET_HANDLE;
-    private static final Class<?> NMS_PLAYER;
     private static final Method CRAFT_TO_NMS_COPY;
     private static final Field NMS_TAG_DATA;
 
@@ -35,8 +28,6 @@ public class ComponentEditing {
         String craftBukkit = Bukkit.getServer().getClass().getPackageName();
         try {
             CRAFT_PLAYER = Class.forName(craftBukkit + ".entity.CraftPlayer");
-            GET_HANDLE = CRAFT_PLAYER.getDeclaredMethod("getHandle");
-            NMS_PLAYER = GET_HANDLE.getReturnType();
             Class<?> craftItemStack = Class.forName(
                     craftBukkit + ".inventory.CraftItemStack"
             );
@@ -45,10 +36,6 @@ public class ComponentEditing {
                     ItemStack.class
             );
             Class<?> nmsItemStack = net.minecraft.world.item.ItemStack.class;
-            Class<?> compoundTag = or(
-                    () -> CompoundTag.class,
-                    () -> Class.forName("net.minecraft.nbt.NBTTagCompound")
-            );
             NMS_TAG_DATA = or(
                     () -> nmsItemStack.getDeclaredField("tag"), // pre 1.20.6
                     () -> nmsItemStack.getDeclaredField("components"), // post 1.20.6
