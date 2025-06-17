@@ -1,0 +1,11 @@
+name: roman_numeral
+version: '0.0.1-alpha'
+main: comfortable_andy.roman_numeral.RomanNumeralMain
+api-version: '1.18'
+authors: [ Comfortable_Andy ]
+depend:
+  - ProtocolLib
+commands:
+  roman:
+    permission: op
+    description: Test command for item components
