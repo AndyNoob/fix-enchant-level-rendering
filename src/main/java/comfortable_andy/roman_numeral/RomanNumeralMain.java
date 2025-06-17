@@ -2,15 +2,15 @@ package comfortable_andy.roman_numeral;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.wrappers.EnumWrappers;
 import com.comphenix.protocol.wrappers.Pair;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.kyori.adventure.text.Component;
-import org.bukkit.*;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.enchantments.Enchantment;
@@ -57,8 +57,20 @@ public final class RomanNumeralMain extends JavaPlugin {
                         return p;
                     });
                     packet.getSlotStackPairLists().write(0, list);
-                } else if (type == PacketType.Play.Server.CHAT || type == PacketType.Play.Server.SYSTEM_CHAT) {
-                    ComponentEditing.editComponents(gson, packet);
+                } else if (type == PacketType.Play.Server.CHAT) {
+                    AbstractStructure editStruct;
+                    if (MinecraftVersion.WILD_UPDATE.atOrAbove()) {
+                        InternalStructure structure = packet.getStructures().read(0);
+                        editStruct = structure.getStructures().readSafely(2).getStructures().readSafely(0);
+                    } else if (MinecraftVersion.CAVES_CLIFFS_2.atOrAbove())
+                        editStruct = packet;
+                    else return;
+                    ComponentEditing.editComponents(gson, editStruct);
+//                    throw new RuntimeException();
+                } else if (type == PacketType.Play.Server.SYSTEM_CHAT) {
+                    String edited = ComponentEditing.editJson(gson, packet.getStrings().read(0));
+                    if (edited == null) return;
+                    packet.getStrings().write(0, edited);
                 }
             }
         });

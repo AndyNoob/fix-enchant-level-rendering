@@ -1,6 +1,6 @@
 package comfortable_andy.roman_numeral;
 
-import com.comphenix.protocol.events.PacketContainer;
+import com.comphenix.protocol.events.AbstractStructure;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -11,6 +11,7 @@ import org.bukkit.Registry;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -67,11 +68,23 @@ public class ComponentEditing {
 
     private static final Pattern HOVER_CAPTURE = Pattern.compile("\\{\\s*\"action\":\\s*\"show_item\",\\s*\"contents\":\\s*\\{\\s*\"id\":\\s*\".+\",\\s*\"tag\":\\s*\".+(?>[]}])\"\\s*}\\s*}");
 
-    @SuppressWarnings("deprecation")
-    public static void editComponents(Gson gson, PacketContainer packet) {
-        WrappedChatComponent component = packet.getChatComponents().readSafely(0);
+    public static void editComponents(Gson gson, AbstractStructure structure) {
+        WrappedChatComponent component = structure.getChatComponents().readSafely(0);
         if (component == null) return;
         String original = component.getJson();
+        String edited = editJson(gson, original);
+        if (edited == null) return;
+        System.out.println(edited);
+        try {
+            component.setJson(edited);
+        } catch (Exception e) {
+            System.out.println("we done messed up");
+        }
+        structure.getChatComponents().writeSafely(0, component);
+    }
+
+    @SuppressWarnings("deprecation")
+    public static @Nullable String editJson(Gson gson, String original) {
         System.out.println("original " + original);
         Matcher matcher = HOVER_CAPTURE.matcher(original);
         String edited = matcher.replaceAll(result -> {
@@ -98,18 +111,12 @@ public class ComponentEditing {
             String json = gson.toJson(section);
             System.out.println("/give @s diamond_axe" + StringEscapeUtils.unescapeJson(section.contents.tag));
             return json;
-        });
+        }).replace("u0027", "'");
         if (edited.equals(original)) {
             System.out.println("same as before");
-            return;
+            return null;
         }
-        System.out.println(edited);
-        try {
-            component.setJson(edited.replace("u0027", "'"));
-        } catch (Exception e) {
-            System.out.println("we done messed up");
-        }
-        packet.getChatComponents().writeSafely(0, component);
+        return edited;
     }
 
     @SuppressWarnings("unused")
