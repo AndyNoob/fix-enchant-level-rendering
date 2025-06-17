@@ -45,10 +45,10 @@ public class ItemEditing {
     public static String asRomanNumeral(int val) {
         StringBuilder builder = new StringBuilder();
         while (val > 0) {
-            if (val > 1000) {
+            if (val >= 1000) {
                 builder.append("M");
                 val -= 1000;
-            } else if (val > 500) {
+            } else if (val >= 500) {
                 // 999
                 // 500 D
                 // 100 * 4 CCCC
@@ -57,13 +57,13 @@ public class ItemEditing {
                 //
                 builder.append("D");
                 val -= 500;
-            } else if (val > 100) {
+            } else if (val >= 100) {
                 builder.append("C");
                 val -= 100;
-            } else if (val > 50) {
+            } else if (val >= 50) {
                 builder.append("L");
                 val -= 50;
-            } else if (val > 10) {
+            } else if (val >= 10) {
                 builder.append("X");
                 val -= 10;
             } else {
