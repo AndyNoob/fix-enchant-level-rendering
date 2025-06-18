@@ -1,8 +1,9 @@
 package comfortable_andy.roman_numeral;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
-import net.kyori.adventure.text.format.TextDecoration;
+import net.md_5.bungee.api.ChatColor;
+import net.md_5.bungee.api.chat.BaseComponent;
+import net.md_5.bungee.api.chat.ComponentBuilder;
+import net.md_5.bungee.api.chat.TranslatableComponent;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
@@ -15,6 +16,7 @@ import java.util.Optional;
 
 public class ItemEditing {
 
+    @SuppressWarnings("deprecation")
     public static ItemStack editItem(ItemStack item) {
         if (item == null) return null;
         if (!item.hasItemMeta()) return item;
@@ -24,20 +26,21 @@ public class ItemEditing {
         if (enchantments.isEmpty()
                 || enchantments.values().stream().noneMatch(v -> v > 10)) return item;
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-        List<Component> prepending = new ArrayList<>();
+        List<BaseComponent[]> prepending = new ArrayList<>();
         for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             Integer value = entry.getValue();
             Enchantment key = entry.getKey();
-            Component component = Component.translatable(key)
-                    .color(NamedTextColor.GRAY)
-                    .decoration(TextDecoration.ITALIC, false);
+            ComponentBuilder builder = new ComponentBuilder()
+                    .italic(false)
+                    .color(ChatColor.GRAY)
+                    .append(new TranslatableComponent(key.translationKey()));
             if (key.getMaxLevel() > 1 || value > 1)
-                component = component.append(Component.space()).append(Component.text(asRomanNumeral(value)));
-            prepending.add(component);
+                builder.append(" ").append(asRomanNumeral(value));
+            prepending.add(builder.create());
         }
-        List<Component> newLore = Optional.ofNullable(meta.lore()).orElse(new ArrayList<>());
+        List<BaseComponent[]> newLore = Optional.ofNullable(meta.getLoreComponents()).orElse(new ArrayList<>());
         prepending.addAll(newLore);
-        meta.lore(prepending);
+        meta.setLoreComponents(prepending);
         item.setItemMeta(meta);
         return item;
     }
