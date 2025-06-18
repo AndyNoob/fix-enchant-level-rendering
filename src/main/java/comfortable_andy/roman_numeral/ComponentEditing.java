@@ -1,6 +1,7 @@
 package comfortable_andy.roman_numeral;
 
 import com.comphenix.protocol.events.AbstractStructure;
+import com.comphenix.protocol.utility.MinecraftVersion;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -36,9 +37,9 @@ public class ComponentEditing {
             );
             Class<?> nmsItemStack = net.minecraft.world.item.ItemStack.class;
             NMS_TAG_DATA = or(
-                    () -> nmsItemStack.getDeclaredField("tag"), // pre 1.20.6
                     () -> nmsItemStack.getDeclaredField("components"), // post 1.20.6
-                    () -> nmsItemStack.getDeclaredField("u"), // pre 1.20.6
+                    () -> nmsItemStack.getDeclaredField("tag"), // pre 1.20.6
+                    () -> MinecraftVersion.FEATURE_PREVIEW_2.atOrAbove() ? nmsItemStack.getDeclaredField("v") : nmsItemStack.getDeclaredField("u"), // pre 1.20.6
                     () -> nmsItemStack.getDeclaredField("r") // post 1.20.6
             );
             NMS_TAG_DATA.trySetAccessible();
@@ -52,9 +53,14 @@ public class ComponentEditing {
         T supply() throws Exception;
     }
 
+    @FunctionalInterface
+    public interface ThrowingRunnable {
+        void run() throws Exception;
+    }
+
     @SafeVarargs
     @NotNull
-    private static <V> V or(ThrowingSupplier<V>... as) {
+    public static <V> V or(ThrowingSupplier<V>... as) {
         for (int i = 0; i < as.length; i++) {
             ThrowingSupplier<V> a = as[i];
             try {
@@ -66,9 +72,20 @@ public class ComponentEditing {
         throw new IllegalStateException();
     }
 
+    public static void run(ThrowingRunnable... as) {
+        for (ThrowingRunnable a : as) {
+            try {
+                a.run();
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+
     private static final Pattern HOVER_CAPTURE = Pattern.compile("\\{\\s*\"action\":\\s*\"show_item\",\\s*\"contents\":\\s*\\{\\s*\"id\":\\s*\".+\",\\s*\"tag\":\\s*\".+(?>[]}])\"\\s*}\\s*}");
 
     public static void editComponents(Gson gson, AbstractStructure structure) {
+        if (structure == null) return;
         WrappedChatComponent component = structure.getChatComponents().readSafely(0);
         if (component == null) return;
         String original = component.getJson();
@@ -85,6 +102,7 @@ public class ComponentEditing {
 
     @SuppressWarnings("deprecation")
     public static @Nullable String editJson(Gson gson, String original) {
+        if (original == null) return null;
         System.out.println("original " + original);
         Matcher matcher = HOVER_CAPTURE.matcher(original);
         String edited = matcher.replaceAll(result -> {
