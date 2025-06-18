@@ -82,7 +82,7 @@ public class ComponentEditing {
         }
     }
 
-    private static final Pattern HOVER_CAPTURE = Pattern.compile("\\{\\s*\"action\":\\s*\"show_item\",\\s*\"contents\":\\s*\\{\\s*\"id\":\\s*\".+\",\\s*\"tag\":\\s*\".+(?>[]}])\"\\s*}\\s*}");
+    private static final Pattern HOVER_CAPTURE = Pattern.compile("\\{\\s*\"action\":\\s*\"show_item\",\\s*\"contents\":\\s*\\{\\s*\"id\":\\s*\".+\",(?>\\s*\"count\":\\s*\\d+,)?\"tag\":\\s*\".+(?>[]}])\"\\s*}(?>,\\s*\"count\":\\s*\\d+)?}");
 
     public static void editComponents(Gson gson, AbstractStructure structure) {
         if (structure == null) return;
@@ -107,6 +107,9 @@ public class ComponentEditing {
         Matcher matcher = HOVER_CAPTURE.matcher(original);
         String edited = matcher.replaceAll(result -> {
             String match = result.group();
+            System.out.println();
+            System.out.println(match);
+            System.out.println();
             ShowItemSection section = gson.fromJson(match, ShowItemSection.class);
             if (section == null) return match;
             NamespacedKey key = NamespacedKey.fromString(section.contents.id);
