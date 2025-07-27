@@ -13,7 +13,10 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
-import org.bukkit.enchantments.Enchantment;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerGameModeChangeEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
@@ -23,7 +26,7 @@ import java.util.List;
 
 import static comfortable_andy.roman_numeral.ComponentEditing.or;
 
-public final class RomanNumeralMain extends JavaPlugin {
+public final class RomanNumeralMain extends JavaPlugin implements Listener {
 
     private static final Class<?> FRIENDLY_BYTE_BUF = or(
             () -> Class.forName("net.minecraft.network.FriendlyByteBuf"),
@@ -38,11 +41,23 @@ public final class RomanNumeralMain extends JavaPlugin {
         );
     }
 
-    private final Gson gson = new GsonBuilder().setLenient().create();
+    private final Gson gson = new GsonBuilder().setLenient().disableHtmlEscaping().create();
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onGameModeChange(PlayerGameModeChangeEvent event) {
+        if (event.getNewGameMode().isInvulnerable()) {
+            Bukkit.getScheduler().runTaskLater(
+                    this,
+                    () -> event.getPlayer().updateInventory(),
+                    1
+            );
+        }
+    }
 
     @Override
     public void onEnable() {
-        // Plugin startup logic
+        saveDefaultConfig();
+        getServer().getPluginManager().registerEvents(this, this);
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(
                 this,
                 PacketType.Play.Server.WINDOW_ITEMS,
