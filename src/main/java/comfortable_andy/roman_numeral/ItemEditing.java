@@ -1,5 +1,7 @@
 package comfortable_andy.roman_numeral;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.md_5.bungee.api.ChatColor;
 import net.md_5.bungee.api.chat.BaseComponent;
 import net.md_5.bungee.api.chat.ComponentBuilder;
@@ -25,15 +27,23 @@ public class ItemEditing {
         Map<Enchantment, Integer> enchantments = item.getEnchantments();
         if (enchantments.isEmpty()
                 || enchantments.values().stream().noneMatch(v -> v > 10)) return item;
+        item = item.clone();
         meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         List<BaseComponent[]> prepending = new ArrayList<>();
         for (Map.Entry<Enchantment, Integer> entry : enchantments.entrySet()) {
             Integer value = entry.getValue();
             Enchantment key = entry.getKey();
+            Component description = key.description();
+            BaseComponent component;
+            if (description instanceof TextComponent c) {
+                component = net.md_5.bungee.api.chat.TextComponent.fromLegacy(c.content());
+            } else if (description instanceof net.kyori.adventure.text.TranslatableComponent c) {
+                component = new TranslatableComponent(c.key());
+            } else component = net.md_5.bungee.api.chat.TextComponent.fromLegacy(key.getKey().toString());
             ComponentBuilder builder = new ComponentBuilder()
                     .italic(false)
                     .color(ChatColor.GRAY)
-                    .append(new TranslatableComponent(key.translationKey()));
+                    .append(component);
             if (key.getMaxLevel() > 1 || value > 1)
                 builder.append(" ").append(asRomanNumeral(value));
             prepending.add(builder.create());

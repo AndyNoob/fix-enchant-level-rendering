@@ -1,0 +1,67 @@
+test: '{
+  "translate": "chat.type.admin",
+                       "with": [
+                         "@",
+                         {
+                           "translate": "commands.give.success.single",
+                           "with": [
+                             1,
+                             {
+                               "translate": "chat.square_brackets",
+                               "with": [
+                                 {
+                                   "text": "",
+                                   "extra": [
+                                     {
+                                       "translate": "item.minecraft.item_frame"
+                                     }
+                                   ]
+                                 }
+                               ],
+                               "hoverEvent": {
+                                 "contents": {
+                                   "id": "minecraft:item_frame",
+                                   "count": 1,
+                                   "components": {
+                                     "minecraft:enchantments": {
+                                       "levels": {
+                                         "minecraft:sharpness": 11
+                                       },
+                                       "show_in_tooltip": 0
+                                     },
+                                     "minecraft:lore": [
+                                       "{\"extra\":[{\"color\":\"gray\",\"italic\":false,\"translate\":\"enchantment.minecraft.sharpness\"},{\"color\":\"gray\",\"italic\":false,\"text\":\" \"},{\"color\":\"gray\",\"italic\":false,\"text\":\"XI\"}],\"text\":\"\"}"
+                                     ]
+                                   }
+                                 },
+                                 "action": "show_item"
+                               },
+                               "color": "aqua"
+                             },
+                             {
+                               "text": "Comfortable_Andy",
+                               "hoverEvent": {
+                                 "contents": {
+                                   "type": "minecraft:player",
+                                   "id": [
+                                     -1804111798,
+                                     -2053096004,
+                                     -1738699474,
+                                     829284367
+                                   ],
+                                   "name": "Comfortable_Andy"
+                                 },
+                                 "action": "show_entity"
+                               },
+                               "insertion": "Comfortable_Andy",
+                               "clickEvent": {
+                                 "action": "suggest_command",
+                                 "value": "/tell Comfortable_Andy "
+                               }
+                             }
+                           ]
+                         }
+                       ],
+                       "italic": true,
+                       "color": "gray"
+}'
